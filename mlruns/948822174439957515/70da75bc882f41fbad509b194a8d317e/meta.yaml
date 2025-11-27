@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/Administrator/Desktop/NLP/Proyecto_X_NLP_Equipo3/mlruns/948822174439957515/70da75bc882f41fbad509b194a8d317e/artifacts
+end_time: 1764083417684
+entry_point_name: ''
+experiment_id: '948822174439957515'
+lifecycle_stage: active
+run_id: 70da75bc882f41fbad509b194a8d317e
+run_name: XGBoost_Baseline_Combined_Features
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764083417554
+status: 4
+tags: []
+user_id: Administrator

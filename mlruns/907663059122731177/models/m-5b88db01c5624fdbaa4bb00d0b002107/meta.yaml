@@ -1,0 +1,10 @@
+artifact_location: file:///c:/Users/Administrator/Desktop/NLP/Proyecto_X_NLP_Equipo3/mlruns/907663059122731177/models/m-5b88db01c5624fdbaa4bb00d0b002107/artifacts
+creation_timestamp: 1764239919257
+experiment_id: '907663059122731177'
+last_updated_timestamp: 1764239930964
+model_id: m-5b88db01c5624fdbaa4bb00d0b002107
+model_type: null
+name: xgb_model
+source_run_id: 613d56b90f8b43849eaa8541f4035e16
+status: 2
+status_message: null

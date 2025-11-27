@@ -1,0 +1,10 @@
+artifact_location: file:///C:/Users/Administrator/Desktop/NLP/Proyecto_X_NLP_Equipo3/mlruns/948822174439957515/models/m-bd71046e9b0f47dda556d97daf012d8b/artifacts
+creation_timestamp: 1764164728732
+experiment_id: '948822174439957515'
+last_updated_timestamp: 1764164740097
+model_id: m-bd71046e9b0f47dda556d97daf012d8b
+model_type: null
+name: svd
+source_run_id: a9f20833842c45a0869d84b84483b5bd
+status: 2
+status_message: null

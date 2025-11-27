@@ -1,0 +1,29 @@
+{
+  "model_name": "Baseline Ultra-Conservative",
+  "test_f1": 0.6878612716763006,
+  "test_accuracy": 0.5242290748898678,
+  "test_precision": 0.5242290748898678,
+  "test_recall": 1.0,
+  "overfitting_pct": 2.1194605009633993,
+  "dataset_size": 997,
+  "augmented_size": 1134,
+  "feature_columns": [
+    "char_count",
+    "word_count",
+    "sentence_count",
+    "avg_word_length",
+    "uppercase_count",
+    "uppercase_ratio",
+    "exclamation_count",
+    "question_count",
+    "emoji_count",
+    "url_count",
+    "mention_count",
+    "hashtag_count",
+    "number_count"
+  ],
+  "tfidf_features": 1500,
+  "total_features": 1513,
+  "smote_applied": true,
+  "data_augmentation": true
+}

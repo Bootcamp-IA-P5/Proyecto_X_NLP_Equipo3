@@ -1,0 +1,10 @@
+artifact_location: file:///C:/Users/Administrator/Desktop/NLP/Proyecto_X_NLP_Equipo3/mlruns/948822174439957515/models/m-18a35fd96c7b4dcf9b6342805fe96d98/artifacts
+creation_timestamp: 1764083912159
+experiment_id: '948822174439957515'
+last_updated_timestamp: 1764083921996
+model_id: m-18a35fd96c7b4dcf9b6342805fe96d98
+model_type: null
+name: model
+source_run_id: c7678fa196e241ddb52096d3fa9f8f24
+status: 2
+status_message: null
