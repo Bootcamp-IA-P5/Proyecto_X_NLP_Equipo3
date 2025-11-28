@@ -1,0 +1,14 @@
+artifact_uri: file:///c:/Users/Administrator/Desktop/NLP/Proyecto_X_NLP_Equipo3/mlruns/907663059122731177/4aeda9c903f64ec1bd569f7782234cf0/artifacts
+end_time: 1764320353096
+entry_point_name: ''
+experiment_id: '907663059122731177'
+lifecycle_stage: active
+run_id: 4aeda9c903f64ec1bd569f7782234cf0
+run_name: LogisticRegression_Baseline
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764320346707
+status: 3
+tags: []
+user_id: Administrator

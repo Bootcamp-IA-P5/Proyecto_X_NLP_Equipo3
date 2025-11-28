@@ -1,0 +1,10 @@
+artifact_location: file:///c:/Users/Administrator/Desktop/NLP/Proyecto_X_NLP_Equipo3/mlruns/907663059122731177/models/m-4371a7a7d2324145ad6fd2408e0814fd/artifacts
+creation_timestamp: 1764253621901
+experiment_id: '907663059122731177'
+last_updated_timestamp: 1764253629420
+model_id: m-4371a7a7d2324145ad6fd2408e0814fd
+model_type: null
+name: calibrator
+source_run_id: 6e015f07de0f48b2a88242adc7c8f212
+status: 2
+status_message: null

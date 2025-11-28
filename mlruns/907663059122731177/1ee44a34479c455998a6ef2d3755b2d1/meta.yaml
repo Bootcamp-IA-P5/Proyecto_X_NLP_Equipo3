@@ -1,0 +1,14 @@
+artifact_uri: file:///c:/Users/Administrator/Desktop/NLP/Proyecto_X_NLP_Equipo3/mlruns/907663059122731177/1ee44a34479c455998a6ef2d3755b2d1/artifacts
+end_time: 1764318760721
+entry_point_name: ''
+experiment_id: '907663059122731177'
+lifecycle_stage: active
+run_id: 1ee44a34479c455998a6ef2d3755b2d1
+run_name: Baseline_Balanced
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764318721620
+status: 3
+tags: []
+user_id: Administrator

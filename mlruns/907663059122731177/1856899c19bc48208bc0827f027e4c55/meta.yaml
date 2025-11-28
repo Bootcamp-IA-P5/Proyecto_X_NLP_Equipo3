@@ -1,0 +1,14 @@
+artifact_uri: file:///c:/Users/Administrator/Desktop/NLP/Proyecto_X_NLP_Equipo3/mlruns/907663059122731177/1856899c19bc48208bc0827f027e4c55/artifacts
+end_time: 1764280001921
+entry_point_name: ''
+experiment_id: '907663059122731177'
+lifecycle_stage: active
+run_id: 1856899c19bc48208bc0827f027e4c55
+run_name: Baseline_No_Calibration
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764279984491
+status: 3
+tags: []
+user_id: Administrator

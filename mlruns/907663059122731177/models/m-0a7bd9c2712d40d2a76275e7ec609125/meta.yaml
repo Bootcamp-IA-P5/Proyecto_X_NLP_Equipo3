@@ -1,0 +1,10 @@
+artifact_location: file:///c:/Users/Administrator/Desktop/NLP/Proyecto_X_NLP_Equipo3/mlruns/907663059122731177/models/m-0a7bd9c2712d40d2a76275e7ec609125/artifacts
+creation_timestamp: 1764320346988
+experiment_id: '907663059122731177'
+last_updated_timestamp: 1764320353072
+model_id: m-0a7bd9c2712d40d2a76275e7ec609125
+model_type: null
+name: logreg_model
+source_run_id: 4aeda9c903f64ec1bd569f7782234cf0
+status: 2
+status_message: null
