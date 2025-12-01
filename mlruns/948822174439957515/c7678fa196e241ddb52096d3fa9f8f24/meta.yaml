@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/Administrator/Desktop/NLP/Proyecto_X_NLP_Equipo3/mlruns/948822174439957515/c7678fa196e241ddb52096d3fa9f8f24/artifacts
+end_time: 1764083922029
+entry_point_name: ''
+experiment_id: '948822174439957515'
+lifecycle_stage: active
+run_id: c7678fa196e241ddb52096d3fa9f8f24
+run_name: XGBoost_Optuna_Tuned
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764083911753
+status: 3
+tags: []
+user_id: Administrator

@@ -1,0 +1,10 @@
+artifact_location: file:///c:/Users/Administrator/Desktop/NLP/Proyecto_X_NLP_Equipo3/mlruns/458412054585385775/models/m-f2b27356674c4eeeac9f4236abcf2e75/artifacts
+creation_timestamp: 1764236656474
+experiment_id: '458412054585385775'
+last_updated_timestamp: 1764236677259
+model_id: m-f2b27356674c4eeeac9f4236abcf2e75
+model_type: null
+name: calibration_model
+source_run_id: f06beac165d34f5ab7ac05a670b64874
+status: 2
+status_message: null

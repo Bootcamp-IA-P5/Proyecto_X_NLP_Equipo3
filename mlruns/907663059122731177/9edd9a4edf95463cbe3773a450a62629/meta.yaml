@@ -1,0 +1,14 @@
+artifact_uri: file:///c:/Users/Administrator/Desktop/NLP/Proyecto_X_NLP_Equipo3/mlruns/907663059122731177/9edd9a4edf95463cbe3773a450a62629/artifacts
+end_time: 1764239531225
+entry_point_name: ''
+experiment_id: '907663059122731177'
+lifecycle_stage: active
+run_id: 9edd9a4edf95463cbe3773a450a62629
+run_name: Optuna_Tuned_Conservative
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764239510876
+status: 3
+tags: []
+user_id: Administrator

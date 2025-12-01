@@ -1,0 +1,14 @@
+artifact_uri: file:///c:/Users/Administrator/Desktop/NLP/Proyecto_X_NLP_Equipo3/mlruns/907663059122731177/d7cda0a06e7542ca80ed99b2d33b9392/artifacts
+end_time: 1764319754840
+entry_point_name: ''
+experiment_id: '907663059122731177'
+lifecycle_stage: active
+run_id: d7cda0a06e7542ca80ed99b2d33b9392
+run_name: Variant_Depth3
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764319743274
+status: 3
+tags: []
+user_id: Administrator

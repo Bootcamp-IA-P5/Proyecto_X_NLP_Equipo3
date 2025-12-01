@@ -1,0 +1,14 @@
+artifact_path: file:///c:/Users/Administrator/Desktop/NLP/Proyecto_X_NLP_Equipo3/mlruns/458412054585385775/models/m-bfd6ac74473642d88202bea9bf942bc5/artifacts
+flavors:
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.7.2
+mlflow_version: 3.6.0
+model_id: m-bfd6ac74473642d88202bea9bf942bc5
+model_size_bytes: 43696
+model_uuid: m-bfd6ac74473642d88202bea9bf942bc5
+prompts: null
+run_id: 85c997dad89144df8bfd16f80b6d59a1
+utc_time_created: '2025-11-26 13:55:01.175469'

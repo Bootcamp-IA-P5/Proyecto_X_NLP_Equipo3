@@ -1,0 +1,14 @@
+artifact_uri: file:///c:/Users/Administrator/Desktop/NLP/Proyecto_X_NLP_Equipo3/mlruns/458412054585385775/25c01b1ed32a4bd788f2b60dcc456692/artifacts
+end_time: 1764161819163
+entry_point_name: ''
+experiment_id: '458412054585385775'
+lifecycle_stage: active
+run_id: 25c01b1ed32a4bd788f2b60dcc456692
+run_name: XGBoost_CV_Validated
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764161803316
+status: 3
+tags: []
+user_id: Administrator
