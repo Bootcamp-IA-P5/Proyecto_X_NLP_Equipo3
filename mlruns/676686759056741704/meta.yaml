@@ -1,6 +1,0 @@
-artifact_location: file:///c:/Users/Administrator/Desktop/NLP/Proyecto_X_NLP_Equipo3/mlruns/676686759056741704
-creation_time: 1764165672635
-experiment_id: '676686759056741704'
-last_update_time: 1764165672635
-lifecycle_stage: active
-name: YouTube_Hate_Detection_XGB_TFIDF

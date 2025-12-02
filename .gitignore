@@ -63,3 +63,6 @@ Thumbs.db*
 
 find_20_features.py
 inspect_model.py
+
+mlruns/
+models/
