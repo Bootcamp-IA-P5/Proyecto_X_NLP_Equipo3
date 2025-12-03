@@ -12,7 +12,7 @@ from unittest.mock import Mock, patch, MagicMock
 import sys
 
 # Agregar el directorio raíz al path para imports
-sys.path.insert(0, str(Path(__file__). parent.parent))
+sys.path. insert(0, str(Path(__file__). parent.parent))
 
 
 # ============================================================================
@@ -43,7 +43,7 @@ def mock_tokenizer():
     tokenizer = Mock()
     tokenizer.return_value = {
         'input_ids': torch.randint(0, 1000, (1, 128)),
-        'attention_mask': torch.ones(1, 128, dtype=torch.long)
+        'attention_mask': torch. ones(1, 128, dtype=torch.long)
     }
     return tokenizer
 
@@ -69,7 +69,7 @@ class TestSetupPaths:
         def setup_paths():
             current_dir = Path. cwd()
             if "notebooks" in str(current_dir):
-                project_root = current_dir.parent
+                project_root = current_dir. parent
             else:
                 project_root = current_dir
             mlruns_dir = project_root / "mlruns"
@@ -115,7 +115,7 @@ class TestSetSeed:
         set_seed(42)
         random_vals_1 = [random.random() for _ in range(5)]
         np_vals_1 = np.random.rand(5). tolist()
-        torch_vals_1 = torch.rand(5). tolist()
+        torch_vals_1 = torch.rand(5).tolist()
         
         # Segunda ejecución con misma semilla
         set_seed(42)
@@ -222,7 +222,7 @@ class TestAugmentMinorityClass:
         def synonym_replacement(text, n=2):
             return text
         
-        def augment_minority_class(X, y, target_class=1, augment_factor=0. 3):
+        def augment_minority_class(X, y, target_class=1, augment_factor=0.3):
             minority_mask = y == target_class
             minority_X = X[minority_mask]
             n_samples = max(1, int(len(minority_X) * augment_factor))
@@ -260,7 +260,7 @@ class TestHateSpeechDataset:
                 self. max_len = max_len
             
             def __len__(self):
-                return len(self. texts)
+                return len(self.texts)
             
             def __getitem__(self, idx):
                 return {'input_ids': torch.zeros(128), 'labels': self.labels[idx]}
@@ -276,7 +276,7 @@ class TestHateSpeechDataset:
             def __init__(self, texts, labels, tokenizer, max_len=128):
                 self.texts = texts
                 self.labels = labels
-                self.tokenizer = tokenizer
+                self. tokenizer = tokenizer
                 self.max_len = max_len
             
             def __len__(self):
@@ -299,12 +299,12 @@ class TestHateSpeechDataset:
     
     def test_dataset_labels_are_tensors(self, sample_texts, sample_labels, mock_tokenizer):
         """Verifica que los labels son tensores de PyTorch"""
-        from torch.utils. data import Dataset
+        from torch.utils.data import Dataset
         
         class HateSpeechDataset(Dataset):
             def __init__(self, texts, labels, tokenizer, max_len=128):
                 self.texts = texts
-                self. labels = labels
+                self.labels = labels
             
             def __len__(self):
                 return len(self. texts)
@@ -340,7 +340,7 @@ class TestCalculateClassWeights:
                 classes=np.array([0, 1]),
                 y=y_train
             )
-            return torch.FloatTensor(class_weights).to(device)
+            return torch.FloatTensor(class_weights). to(device)
         
         weights = calculate_class_weights(sample_labels, device)
         assert isinstance(weights, torch.Tensor)
@@ -389,7 +389,7 @@ class TestEvalModel:
     
     def test_eval_returns_dict_with_metrics(self):
         """Verifica que eval_model retorna un diccionario con todas las métricas"""
-        from sklearn.metrics import precision_recall_fscore_support
+        from sklearn. metrics import precision_recall_fscore_support
         
         def eval_model(model, data_loader, device):
             # Simular evaluación
@@ -452,7 +452,7 @@ class TestDataLoaderIntegration:
     
     def test_dataloader_batch_size(self, sample_texts, sample_labels, mock_tokenizer):
         """Verifica que el DataLoader respeta el batch size"""
-        from torch. utils.data import Dataset, DataLoader
+        from torch.utils.data import Dataset, DataLoader
         
         class HateSpeechDataset(Dataset):
             def __init__(self, texts, labels, tokenizer, max_len=128):
@@ -528,7 +528,7 @@ class TestDataSplit:
     
     def test_no_data_leakage(self, sample_texts, sample_labels):
         """Verifica que no hay fuga de datos entre splits"""
-        from sklearn. model_selection import train_test_split
+        from sklearn.model_selection import train_test_split
         
         X_train, X_test, y_train, y_test = train_test_split(
             sample_texts, sample_labels, test_size=0.3, random_state=42
@@ -606,7 +606,7 @@ class TestOverfittingDetection:
         overfitting_gap = abs(train_loss - val_loss)
         overfitting_pct = (overfitting_gap / train_loss) * 100
         
-        expected_pct = (0.2 / 0. 3) * 100  # ~66.67%
+        expected_pct = (0.2 / 0.3) * 100  # ~66.67%
         assert abs(overfitting_pct - expected_pct) < 0.01
     
     def test_no_overfitting_case(self):
@@ -690,7 +690,7 @@ class TestEdgeCases:
     
     def test_special_characters_handling(self):
         """Verifica el manejo de caracteres especiales"""
-        special_text = "Hello!  @user #hashtag 🎉 https://example.com"
+        special_text = "Hello! @user #hashtag 🎉 https://example.com"
         
         # Debería poder procesarse sin errores
         assert isinstance(special_text, str)
