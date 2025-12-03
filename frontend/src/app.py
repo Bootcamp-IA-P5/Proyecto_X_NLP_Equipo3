@@ -26,20 +26,21 @@ def load_models_from_folder(models_folder=MODELS_DIR):
     Carga automáticamente todos los modelos desde la carpeta especificada.
     Soporta:
       - Diccionarios 'model_artifacts' (XGBoost + vectorizer + scalers + threshold)
-      - Paquetes {'model': ..., 'tokenizer': ...} (BERT)
+      - Diccionarios 'random_forest_artifacts' (Random Forest + vectorizer + scaler)
+      - Paquetes {'model': .. ., 'tokenizer': ...} (BERT)
       - Modelos sklearn / xgboost sueltos
     """
     models = {}
     models_path = Path(models_folder)
 
-    if not models_path.exists():
+    if not models_path. exists():
         return models
 
     pattern = str(models_path / "*.pkl")
     for path in glob.glob(pattern):
         file_path = Path(path)
-        filename = file_path.name
-        model_name = file_path.stem
+        filename = file_path. name
+        model_name = file_path. stem
 
         try:
             try:
@@ -55,7 +56,12 @@ def load_models_from_folder(models_folder=MODELS_DIR):
             }
 
             if isinstance(obj, dict) and "model" in obj and "vectorizer" in obj:
-                entry["type"] = "xgboost_artifacts"
+                # Detectar si es Random Forest o XGBoost
+                inner_model = obj["model"]
+                if hasattr(inner_model, '__class__') and 'RandomForest' in inner_model.__class__.__name__:
+                    entry["type"] = "random_forest_artifacts"
+                else:
+                    entry["type"] = "xgboost_artifacts"
             elif isinstance(obj, dict) and "model" in obj and "tokenizer" in obj:
                 entry["type"] = "bert_package"
             elif hasattr(obj, "predict"):
@@ -176,6 +182,39 @@ def predict_with_xgboost_artifacts(text, artifacts):
     pred = int(proba[1] >= threshold)
     return pred, proba
 
+def predict_with_random_forest(text, artifacts):
+    """
+    Predicción usando Random Forest con TF-IDF y features numéricas básicas.
+    """
+    from scipy. sparse import hstack, csr_matrix
+
+    model = artifacts["model"]
+    vectorizer = artifacts["vectorizer"]
+    scaler = artifacts["scaler"]
+    threshold = artifacts. get("threshold", 0.5)
+    feature_columns = artifacts. get("feature_columns", [])
+
+    # Vectorizar texto
+    text_tfidf = vectorizer.transform([text])
+
+    # Features numéricas (inicializadas en cero si no hay texto procesado)
+    if feature_columns:
+        num_features = np.zeros((1, len(feature_columns)))
+        num_features_scaled = scaler.transform(num_features)
+    else:
+        num_features_scaled = np.zeros((1, 0))
+
+    # Combinar features (SIN features avanzadas)
+    X_combined = hstack([
+        text_tfidf,
+        csr_matrix(num_features_scaled)
+    ])
+
+    # Predicción
+    proba = model. predict_proba(X_combined)[0]
+    pred = int(proba[1] >= threshold)
+    
+    return pred, proba
 
 def predict_text(text, model_name, models):
     try:
@@ -212,6 +251,9 @@ def predict_text(text, model_name, models):
                 prediction = int(torch.argmax(logits, dim=1).cpu().item())
 
             return prediction, probs
+        
+        if model_type == "random_forest_artifacts":
+            return predict_with_random_forest(text, model_data)
 
         if hasattr(model_data, 'config') and hasattr(model_data.config, '_name_or_path'):
             import torch
