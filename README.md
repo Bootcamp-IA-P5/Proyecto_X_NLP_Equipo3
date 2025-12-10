@@ -1,9 +1,9 @@
 # 🛡️ Proyecto X NLP - Detección de Mensajes de Odio en YouTube
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
-[![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3+-orange.svg)](https://scikit-learn. org/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3+-orange.svg)
 [![XGBoost](https://img.shields.io/badge/XGBoost-Latest-green.svg)](https://xgboost.readthedocs.io/)
-[![Transformers](https://img.shields.io/badge/🤗_Transformers-BERT-yellow.svg)](https://huggingface. co/transformers/)
+[![Transformers](https://img.shields.io/badge/🤗_Transformers-BERT-yellow.svg)
 [![MLflow](https://img.shields.io/badge/MLflow-Tracking-red.svg)](https://mlflow.org/)
 
 ## 📋 Descripción
