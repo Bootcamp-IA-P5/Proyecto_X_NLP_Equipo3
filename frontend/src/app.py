@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 import joblib
 import glob
+import torch 
 
 # Configuración de la página
 st.set_page_config(
@@ -17,17 +18,73 @@ st.set_page_config(
 MODELS_DIR = "models"
 DATASET_PATH = r"C:\Users\Administrator\Desktop\NLP\Proyecto_X_NLP_Equipo3\data\processed\youtube_all_versions.pkl"
 
+# ==================== CLASE DETECTOR BERT ====================
 
+class HateSpeechDetector:
+    """
+    Detector de discurso de odio para modelos BERT guardados con model_state_dict. 
+    """
+    
+    def __init__(self, model_path):
+        from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoConfig
+        
+        with open(model_path, "rb") as f:
+            self.package = pickle.load(f)
+        
+        self.device = torch.device("cuda" if torch. cuda.is_available() else "cpu")
+        self.max_length = self.package.get("max_length", 128)
+        self.threshold = self.package. get("optimal_threshold", 0.5)
+        
+        model_name = self. package.get("model_name", "bert-base-multilingual-cased")
+        self.tokenizer = AutoTokenizer. from_pretrained(model_name)
+        
+        config = AutoConfig.from_pretrained(model_name)
+        config.num_labels = self.package. get("num_labels", 2)
+        
+        if "config" in self. package:
+            config.hidden_dropout_prob = self.package["config"].get("hidden_dropout_prob", 0.1)
+            config. attention_probs_dropout_prob = self.package["config"]. get("attention_probs_dropout_prob", 0.1)
+        
+        self.model = AutoModelForSequenceClassification.from_pretrained(
+            model_name,
+            config=config,
+            ignore_mismatched_sizes=True
+        )
+        self.model.load_state_dict(self.package["model_state_dict"])
+        self.model.to(self. device)
+        self.model.eval()
+    
+    def predict(self, text):
+        with torch.no_grad():
+            encoding = self.tokenizer(
+                text,
+                max_length=self.max_length,
+                truncation=True,
+                padding="max_length",
+                return_tensors="pt"
+            )
+            
+            input_ids = encoding["input_ids"].to(self.device)
+            attention_mask = encoding["attention_mask"].to(self. device)
+            
+            outputs = self. model(input_ids=input_ids, attention_mask=attention_mask)
+            probs = torch. softmax(outputs. logits, dim=1)
+            prob_hate = probs[0, 1].item()
+            
+            is_hate = int(prob_hate >= self.threshold)
+            return is_hate, np.array([1 - prob_hate, prob_hate])
+        
 # ==================== CARGA DE MODELOS ====================
 
 @st.cache_resource
 def load_models_from_folder(models_folder=MODELS_DIR):
     """
     Carga automáticamente todos los modelos desde la carpeta especificada.
-    Soporta:
+    Soporta: 
+      - Diccionarios con 'model_state_dict' (BERT guardado con pesos)
       - Diccionarios 'model_artifacts' (XGBoost + vectorizer + scalers + threshold)
       - Diccionarios 'random_forest_artifacts' (Random Forest + vectorizer + scaler)
-      - Paquetes {'model': .. ., 'tokenizer': ...} (BERT)
+      - Paquetes {'model':  .. ., 'tokenizer': ...} (BERT)
       - Modelos sklearn / xgboost sueltos
     """
     models = {}
@@ -40,38 +97,52 @@ def load_models_from_folder(models_folder=MODELS_DIR):
     for path in glob.glob(pattern):
         file_path = Path(path)
         filename = file_path. name
-        model_name = file_path. stem
+        model_name = file_path.stem
 
         try:
             try:
                 obj = joblib.load(file_path)
-            except Exception:
+            except Exception: 
                 with open(file_path, "rb") as f:
                     obj = pickle.load(f)
 
             entry = {
-                "model": obj,
+                "model":  obj,
                 "path": str(file_path),
                 "type": None,
             }
 
-            if isinstance(obj, dict) and "model" in obj and "vectorizer" in obj:
+            # Detectar modelo BERT con model_state_dict (tu modelo)
+            if isinstance(obj, dict) and "model_state_dict" in obj and "model_name" in obj:
+                entry["type"] = "bert_state_dict"
+                try: 
+                    detector = HateSpeechDetector(str(file_path))
+                    entry["detector"] = detector
+                    entry["metrics"] = obj. get("metrics", {})
+                    entry["threshold"] = obj.get("optimal_threshold", 0.5)
+                except Exception as e: 
+                    st. warning(f"Error cargando detector BERT {model_name}: {e}")
+                models[model_name] = entry
+                continue
+
+            if isinstance(obj, dict) and "model" in obj and "vectorizer" in obj: 
                 # Detectar si es Random Forest o XGBoost
                 inner_model = obj["model"]
-                if hasattr(inner_model, '__class__') and 'RandomForest' in inner_model.__class__.__name__:
+                if hasattr(inner_model, '__class__') and 'RandomForest' in inner_model.__class__.__name__: 
                     entry["type"] = "random_forest_artifacts"
                 else:
                     entry["type"] = "xgboost_artifacts"
-            elif isinstance(obj, dict) and "model" in obj and "tokenizer" in obj:
+            elif isinstance(obj, dict) and "model" in obj and "tokenizer" in obj: 
                 entry["type"] = "bert_package"
             elif hasattr(obj, "predict"):
                 entry["type"] = "sklearn_or_xgb"
-            else:
+            else: 
                 entry["type"] = "unknown"
 
             models[model_name] = entry
 
-        except Exception:
+        except Exception as e: 
+            st.warning(f"Error cargando {filename}: {e}")
             continue
 
     return models
@@ -222,15 +293,27 @@ def predict_text(text, model_name, models):
         model_data = model_entry["model"]
         model_type = model_entry.get("type", "unknown")
 
+        # Manejar modelo BERT con state_dict (tu modelo)
+        if model_type == "bert_state_dict": 
+            detector = model_entry.get("detector")
+            if detector: 
+                return detector. predict(text)
+            else:
+                st.error("Detector BERT no inicializado")
+                return None, None
+
         if model_type == "xgboost_artifacts":
             return predict_with_xgboost_artifacts(text, model_data)
+
+        if model_type == "random_forest_artifacts":
+            return predict_with_random_forest(text, model_data)
 
         if model_type == "bert_package" or (isinstance(model_data, dict) and 'model' in model_data and 'tokenizer' in model_data):
             import torch
 
             tokenizer = model_data['tokenizer']
             model = model_data['model']
-            max_len = model_data.get('max_len', 128)
+            max_len = model_data. get('max_len', 128)
 
             model.eval()
             device = next(model.parameters()).device
@@ -251,16 +334,13 @@ def predict_text(text, model_name, models):
                 prediction = int(torch.argmax(logits, dim=1).cpu().item())
 
             return prediction, probs
-        
-        if model_type == "random_forest_artifacts":
-            return predict_with_random_forest(text, model_data)
 
         if hasattr(model_data, 'config') and hasattr(model_data.config, '_name_or_path'):
             import torch
             from transformers import AutoTokenizer
 
             model = model_data
-            model_name_hf = model.config._name_or_path
+            model_name_hf = model. config._name_or_path
             tokenizer = AutoTokenizer.from_pretrained(model_name_hf)
 
             model.eval()
@@ -273,9 +353,9 @@ def predict_text(text, model_name, models):
                 max_length=128,
                 return_tensors='pt'
             )
-            inputs = {k: v.to(device) for k, v in inputs.items()}
+            inputs = {k:  v.to(device) for k, v in inputs.items()}
 
-            with torch.no_grad():
+            with torch. no_grad():
                 outputs = model(**inputs)
                 logits = outputs.logits
                 probs = torch.softmax(logits, dim=1).cpu().numpy()[0]
@@ -294,12 +374,11 @@ def predict_text(text, model_name, models):
         st.error(f"Tipo de modelo no reconocido: {type(model_data)} ({model_type})")
         return None, None
 
-    except Exception as e:
+    except Exception as e: 
         st.error(f"Error en predicción: {str(e)}")
         import traceback
         st.code(traceback.format_exc())
         return None, None
-
 
 # ==================== CARGA GLOBAL ====================
 
@@ -475,78 +554,125 @@ with tab_pred:
         st.warning("No models loaded. Please add models to the 'models' folder.")
 
 
-# ==================== PESTAÑA 4: Predicción por vídeo ====================
+# ==================== PESTAÑA 4: YouTube ====================
 with tab_video:
-    st.header("Predicción de Comentarios por Vídeo")
-
-    if dataset is not None:
-        if isinstance(dataset, pd.DataFrame):
-            df = dataset
-        elif isinstance(dataset, dict):
-            st.subheader("Versiones disponibles en el dataset")
-            version_key = st.selectbox("Selecciona una versión:", list(dataset.keys()), key="video_version")
-            df = dataset[version_key]
-        else:
-            df = pd.DataFrame(dataset)
-
-        if 'VideoId' not in df.columns:
-            st.error("El dataset no contiene la columna 'VideoId'.")
-        else:
-            video_ids = df['VideoId'].unique().tolist()
-            selected_video = st.selectbox("Selecciona un vídeo:", video_ids)
-
-            video_df = df[df['VideoId'] == selected_video].copy()
-            st.subheader("Comentarios del vídeo seleccionado")
-            st.write(f"Total de comentarios: {len(video_df)}")
-
-            text_col = None
-            for col in ['Text_Lemmatized', 'Text_Clean_Basic', 'Text', 'Text_Clean_Advanced']:
-                if col in video_df.columns:
-                    text_col = col
-                    break
-
-            if text_col is None:
-                st.error("No se encontró columna de texto en el dataset.")
-            else:
-                st.write(f"Usando columna de texto: {text_col}")
-
-                if models:
-                    model_names = list(models.keys())
-                    selected_model_video = st.selectbox("Modelo para analizar los comentarios:", model_names, key="video_model")
-
-                    if st.button("Analizar todos los comentarios del vídeo"):
+    st.header("🎬 Análisis de Comentarios de YouTube")
+    
+    st.warning("""
+    ⚠️ **Importante:** Se usa la API oficial de YouTube (seguro y legal).
+    Necesitas una API Key gratuita de Google.
+    """)
+    
+    if not models or not selected_model:
+        st.error("⚠️ Necesitas tener al menos un modelo cargado")
+    else:
+        st.success(f"🤖 Usando modelo: **{selected_model}**")
+        
+        st.subheader("🔑 Configuración")
+        api_key = st.text_input(
+            "YouTube API Key:",
+            type="password",
+            help="Obtén tu API Key gratis en: https://console.cloud.google.com/apis/credentials"
+        )
+        
+        if not api_key:
+            st.info("""
+            **¿Cómo obtener una API Key gratuita?**
+            1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
+            2. Crea un proyecto nuevo
+            3. Habilita "YouTube Data API v3"
+            4. Crea credenciales → API Key
+            """)
+        
+        st.divider()
+        
+        youtube_url = st.text_input(
+            "URL del video de YouTube:",
+            placeholder="https://www.youtube.com/watch?v=..."
+        )
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            max_comments = st.slider("Máximo de comentarios:", 10, 200, 50)
+        with col2:
+            video_id = extract_video_id(youtube_url) if youtube_url else None
+            if video_id:
+                st.success(f"✅ Video ID: {video_id}")
+        
+        if st.button("📥 Extraer y Analizar", type="primary", disabled=not api_key):
+            if not api_key:
+                st.error("❌ Introduce tu YouTube API Key")
+            elif youtube_url and video_id:
+                with st.spinner(f"Extrayendo hasta {max_comments} comentarios..."):
+                    comments, error = get_youtube_comments_api(video_id, api_key, max_comments)
+                    
+                    if error:
+                        st.error(error)
+                    elif comments:
+                        st.success(f"✅ {len(comments)} comentarios extraídos")
+                        
                         with st.spinner("Analizando comentarios..."):
                             results = []
-                            for idx, row in video_df.iterrows():
-                                text = str(row[text_col])
-                                pred, prob = predict_text(text, selected_model_video, models)
-                                if prob is not None:
-                                    conf = float(max(prob))
-                                else:
-                                    conf = None
+                            hate_count = 0
+                            
+                            progress_bar = st.progress(0)
+                            for i, comment in enumerate(comments):
+                                pred, prob = predict_text(comment['texto'], selected_model, models)
+                                
+                                is_hate = pred == 1 if pred is not None else False
+                                if is_hate:
+                                    hate_count += 1
+                                
+                                confidence = max(prob)*100 if prob is not None else 0
+                                
                                 results.append({
-                                    "CommentId": row.get("CommentId", idx),
-                                    "Text": text,
-                                    "Prediction": "Hate" if pred == 1 else "Normal",
-                                    "Confidence": conf
+                                    'Autor': comment['autor'],
+                                    'Comentario': comment['texto'][:100] + '...' if len(comment['texto']) > 100 else comment['texto'],
+                                    'Clasificación': '🔴 Odio' if is_hate else '🟢 Normal',
+                                    'Confianza': f"{confidence:.1f}%",
+                                    'Likes': comment['likes']
                                 })
-                            res_df = pd.DataFrame(results)
-
-                            st.subheader("Results")
-                            st.dataframe(res_df, use_container_width=True)
-
-                            hate_count = (res_df["Prediction"] == "Hate").sum()
-                            normal_count = (res_df["Prediction"] == "Normal").sum()
-                            st.write(f"Hate comments: {hate_count}")
-                            st.write(f"Normal comments: {normal_count}")
-
-                            st.subheader("Prediction distribution")
-                            dist = res_df["Prediction"].value_counts()
-                            st.bar_chart(dist)
-                else:
-                    st.warning("No models loaded to analyze comments.")
-    else:
-        st.error(f"No se encontró o no se pudo cargar el archivo: {DATASET_PATH}")
+                                
+                                progress_bar.progress((i + 1) / len(comments))
+                        
+                        st.subheader("📊 Resumen")
+                        col1, col2, col3 = st.columns(3)
+                        with col1:
+                            st.metric("Total", len(comments))
+                        with col2:
+                            st.metric("Odio detectado", hate_count)
+                        with col3:
+                            pct = (hate_count / len(comments)) * 100
+                            st.metric("% Odio", f"{pct:.1f}%")
+                        
+                        st.subheader("📝 Resultados")
+                        
+                        filter_option = st.radio(
+                            "Filtrar:",
+                            ["Todos", "Solo odio", "Solo normales"],
+                            horizontal=True
+                        )
+                        
+                        results_df = pd.DataFrame(results)
+                        
+                        if filter_option == "Solo odio":
+                            results_df = results_df[results_df['Clasificación'] == '🔴 Odio']
+                        elif filter_option == "Solo normales":
+                            results_df = results_df[results_df['Clasificación'] == '🟢 Normal']
+                        
+                        st.dataframe(results_df, use_container_width=True)
+                        
+                        csv = results_df.to_csv(index=False).encode('utf-8')
+                        st.download_button(
+                            "📥 Descargar CSV",
+                            csv,
+                            f"analisis_{video_id}.csv",
+                            "text/csv"
+                        )
+                    else:
+                        st.warning("No se encontraron comentarios")
+            else:
+                st.warning("Introduce una URL válida de YouTube")
 
 
 # ==================== SIDEBAR ====================
